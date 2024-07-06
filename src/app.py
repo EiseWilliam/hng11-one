@@ -1,14 +1,10 @@
-import os
 from flask import Flask, request, jsonify
 import requests
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = Flask(__name__)
 
 
-@app.route("/hello")
+@app.route("/api/hello")
 def hello():
     visitor_name = request.args.get("visitor_name", "Guest")
     client_ip = request.environ.get("HTTP_X_REAL_IP", request.remote_addr)
@@ -32,15 +28,12 @@ def hello():
         response = {
             "client_ip": client_ip,
             "location": city,
-            "latitude": latitude,
-            "longitude": longitude,
             "greeting": f"Hello, {visitor_name}! The temperature is {temperature} degrees Celsius in {city}",
         }
 
         return jsonify(response)
-    except Exception as e:
-        print("Error:", str(e))
-        return jsonify({"error": "Failed to fetch data"}), 500
+    except requests.exceptions.RequestException:
+        return jsonify({"error": "Failed to fetch data from external api"}), 500
 
 
 if __name__ == "__main__":
